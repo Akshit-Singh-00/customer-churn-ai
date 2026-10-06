@@ -12,6 +12,10 @@ from app.api.services.explainability import (
     explain_customer
 )
 
+from app.api.services.ai_retention import (
+    generate_retention_advice
+)
+
 # -----------------------------------
 # Locate project root
 # -----------------------------------
@@ -126,6 +130,27 @@ def predict_customer(
     top_n=5
 )
 
+    ai_result = generate_retention_advice(
+
+    customer_data=customer_data,
+
+    probability=float(
+        probability
+    ),
+
+    prediction=prediction_label,
+
+    risk_category=risk_category,
+
+    risk_factors=explanation[
+        "risk_factors"
+    ],
+
+    protective_factors=explanation[
+        "protective_factors"
+    ]
+)
+
     return {
 
     "churn_probability": round(
@@ -153,5 +178,14 @@ def predict_customer(
 
     "top_protective_factors": explanation[
         "protective_factors"
-    ]
+    ],
+    "ai_status": ai_result[
+    "status"
+],
+
+"ai_recommendation": ai_result[
+    "recommendation"
+]
+
 }
+
