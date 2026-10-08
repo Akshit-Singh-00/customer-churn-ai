@@ -509,3 +509,53 @@ if submitted:
     st.markdown(
         ai_recommendation
     )
+
+    # --------------------------------------------------
+    # Retrieved retention policies
+    # --------------------------------------------------
+
+    retrieved_policies = data.get(
+        "retrieved_policies",
+        []
+    )
+
+    if retrieved_policies:
+
+        st.divider()
+
+        st.subheader(
+    "AI Retention Recommendation"
+)
+
+        st.caption(
+    "Generated using the ML prediction, SHAP explanation, "
+    "and retrieved company retention policies."
+)
+
+        st.write(
+            "These company policies were retrieved by "
+            "the RAG system and used to generate the "
+            "AI recommendation."
+        )
+
+        with st.expander(
+            "View Retention Policies Used"
+        ):
+
+            for i, policy in enumerate(
+                retrieved_policies,
+                start=1
+            ):
+
+                st.markdown(
+                    f"### Policy {i}"
+                )
+
+                st.text(
+                    policy
+                )
+
+                if i < len(
+                    retrieved_policies
+                ):
+                    st.divider()

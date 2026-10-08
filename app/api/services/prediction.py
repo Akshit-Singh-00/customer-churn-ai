@@ -185,7 +185,11 @@ def predict_customer(
 
 "ai_recommendation": ai_result[
     "recommendation"
-]
+],
+"retrieved_policies": ai_result.get(
+    "retrieved_policies",
+    []
+),
 
 }
 

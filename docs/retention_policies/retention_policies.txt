@@ -1,0 +1,50 @@
+POLICY 1: MONTH-TO-MONTH CONTRACT
+
+Customers on month-to-month contracts may be offered:
+- A 10% discount for moving to a one-year contract.
+- A 15% discount for moving to a two-year contract.
+- Contract migration should not remove existing services unless the customer requests it.
+
+
+POLICY 2: TECHNICAL SUPPORT
+
+Customers without technical support may be offered:
+- Three months of complimentary technical support.
+- Priority support onboarding.
+- A follow-up service review after 30 days.
+
+
+POLICY 3: HIGH MONTHLY CHARGES
+
+Customers with high monthly charges may be offered:
+- A plan review.
+- Removal of unused add-on services.
+- A lower-cost bundled plan where eligible.
+- Discounts must remain within approved pricing rules.
+
+
+POLICY 4: NEW CUSTOMERS
+
+Customers with tenure below 12 months may receive:
+- Onboarding assistance.
+- Service education.
+- A first-year loyalty incentive.
+- Proactive support contact.
+
+
+POLICY 5: PAYMENT METHOD
+
+Customers using manual payment methods may be encouraged to move to automatic payment.
+Eligible customers may receive:
+- A small billing discount.
+- Payment reminders.
+- Auto-pay setup assistance.
+
+
+POLICY 6: RETENTION RESTRICTIONS
+
+Retention agents must:
+- Never promise unauthorized discounts.
+- Never change a customer's plan without consent.
+- Never use demographic traits such as gender or age to decide offers.
+- Base recommendations on service usage, account status, billing, contract type, and support needs.

@@ -4,6 +4,10 @@ import os
 from dotenv import load_dotenv
 from google import genai
 
+from app.api.services.rag_retention import (
+    retrieve_policies
+)
+
 
 # -----------------------------------------
 # Load environment variables
@@ -78,21 +82,6 @@ def generate_retention_advice(
     protective_factors: list
 ) -> dict:
 
-    # -------------------------------------
-    # No API key
-    # -------------------------------------
-
-    if client is None:
-
-        return {
-            "status": "unavailable",
-            "recommendation": (
-                "AI recommendation is unavailable "
-                "because the Gemini API key "
-                "is not configured."
-            )
-        }
-
 
     # -------------------------------------
     # Prepare SHAP factors
@@ -105,6 +94,47 @@ def generate_retention_advice(
     protective_text = factors_to_text(
         protective_factors
     )
+
+
+    # -------------------------------------
+    # Build retrieval query
+    # -------------------------------------
+
+    retrieval_query = f"""
+Contract: {customer_data['contract']}
+Tenure: {customer_data['tenure']}
+Internet Service: {customer_data['internetservice']}
+Technical Support: {customer_data['techsupport']}
+Payment Method: {customer_data['paymentmethod']}
+Monthly Charges: {customer_data['monthlycharges']}
+
+Risk Factors:
+{risk_text}
+"""
+
+
+    # -------------------------------------
+    # Retrieve relevant policies
+    # -------------------------------------
+
+    relevant_policies = retrieve_policies(
+        retrieval_query,
+        top_k=3
+    )
+
+
+    if relevant_policies:
+
+        policy_text = "\n\n".join(
+            relevant_policies
+        )
+
+    else:
+
+        policy_text = (
+            "No specific retention policy "
+            "was retrieved."
+        )
 
 
     # -------------------------------------
@@ -126,6 +156,25 @@ Paperless Billing: {customer_data['paperlessbilling']}
 
 
     # -------------------------------------
+    # No API key
+    # -------------------------------------
+
+    if client is None:
+
+        return {
+            "status": "unavailable",
+
+            "recommendation": (
+                "AI recommendation is unavailable "
+                "because the Gemini API key "
+                "is not configured."
+            ),
+
+            "retrieved_policies": relevant_policies
+        }
+
+
+    # -------------------------------------
     # Prompt
     # -------------------------------------
 
@@ -140,13 +189,18 @@ IMPORTANT RULES:
 
 1. Never change or recalculate the churn probability.
 2. Do not invent customer information.
-3. SHAP factors explain model behavior;
-   do not claim they prove causation.
+3. SHAP factors explain model behavior.
+   Do not claim they prove causation.
 4. Recommend only practical retention actions.
 5. Do not base retention actions on gender,
    age, or demographic characteristics.
 6. Keep the response concise.
 7. Give exactly three retention actions.
+8. Recommendations must follow the provided
+   company retention policies.
+9. Do not recommend discounts or actions
+   that are not supported by the policies.
+
 
 MODEL RESULT
 
@@ -175,6 +229,11 @@ FACTORS REDUCING THE MODEL'S
 CHURN PREDICTION
 
 {protective_text}
+
+
+RELEVANT COMPANY RETENTION POLICIES
+
+{policy_text}
 
 
 Return:
@@ -208,7 +267,12 @@ Low, Medium, High, or Critical.
 
         return {
             "status": "available",
-            "recommendation": response.text
+
+            "recommendation":
+                response.text,
+
+            "retrieved_policies":
+                relevant_policies
         }
 
 
@@ -216,10 +280,14 @@ Low, Medium, High, or Critical.
 
         return {
             "status": "unavailable",
+
             "recommendation": (
                 "AI recommendation is temporarily "
                 "unavailable. The machine-learning "
                 "prediction and SHAP explanation "
                 "are still available."
-            )
+            ),
+
+            "retrieved_policies":
+                relevant_policies
         }
