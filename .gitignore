@@ -11,10 +11,6 @@ __pycache__/
 # Environment variables / secrets
 .env
 
-# Trained models
-models/*.pkl
-models/*.joblib
-
 # Processed data
 data/processed/
 
