@@ -11,8 +11,7 @@ __pycache__/
 # Environment variables / secrets
 .env
 
-# Processed data
-data/processed/
+
 
 # macOS
 .DS_Store
