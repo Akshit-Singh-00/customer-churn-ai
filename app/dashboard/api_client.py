@@ -65,7 +65,11 @@ API_URL = os.getenv(
 # ----------------------------------
 
 def predict_churn(
-    customer_data: dict
+    response = requests.post(
+    endpoint,
+    json=customer_data,
+    timeout=120
+)
 ):
 
     endpoint = (
