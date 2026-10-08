@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import (
@@ -8,48 +9,86 @@ from sqlalchemy.orm import (
 
 
 # --------------------------------------------------
-# Project paths
+# Project root
 # --------------------------------------------------
 
 PROJECT_ROOT = Path(
     __file__
 ).resolve().parents[2]
 
-DATA_DIR = (
-    PROJECT_ROOT
-    / "data"
-)
 
-DATA_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+# --------------------------------------------------
+# Database URL
+# --------------------------------------------------
 
-DATABASE_PATH = (
-    DATA_DIR
-    / "app.db"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
 )
 
 
 # --------------------------------------------------
-# SQLite database URL
+# Local fallback: SQLite
 # --------------------------------------------------
 
-DATABASE_URL = (
-    f"sqlite:///{DATABASE_PATH.as_posix()}"
-)
+if not DATABASE_URL:
+
+    DATA_DIR = (
+        PROJECT_ROOT
+        / "data"
+    )
+
+    DATA_DIR.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    DATABASE_PATH = (
+        DATA_DIR
+        / "app.db"
+    )
+
+    DATABASE_URL = (
+        f"sqlite:///"
+        f"{DATABASE_PATH.as_posix()}"
+    )
 
 
 # --------------------------------------------------
-# Database engine
+# Fix old postgres URL format if needed
 # --------------------------------------------------
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={
-        "check_same_thread": False
-    }
-)
+if DATABASE_URL.startswith(
+    "postgres://"
+):
+
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql://",
+        1
+    )
+
+
+# --------------------------------------------------
+# Engine
+# --------------------------------------------------
+
+if DATABASE_URL.startswith(
+    "sqlite"
+):
+
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={
+            "check_same_thread": False
+        }
+    )
+
+else:
+
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True
+    )
 
 
 # --------------------------------------------------
@@ -64,14 +103,14 @@ SessionLocal = sessionmaker(
 
 
 # --------------------------------------------------
-# Base model
+# Base
 # --------------------------------------------------
 
 Base = declarative_base()
 
 
 # --------------------------------------------------
-# Database dependency
+# DB dependency
 # --------------------------------------------------
 
 def get_db():
