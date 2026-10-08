@@ -1,3 +1,39 @@
+
+from pathlib import Path
+import os
+
+import requests
+import streamlit as st
+from dotenv import load_dotenv
+
+
+PROJECT_ROOT = Path(
+    __file__
+).resolve().parents[2]
+
+
+load_dotenv(
+    PROJECT_ROOT / ".env"
+)
+
+
+def get_api_url():
+
+    try:
+        return st.secrets[
+            "FASTAPI_URL"
+        ]
+
+    except Exception:
+
+        return os.getenv(
+            "FASTAPI_URL",
+            "http://127.0.0.1:8000"
+        )
+
+
+API_URL = get_api_url()
+
 from pathlib import Path
 import os
 
