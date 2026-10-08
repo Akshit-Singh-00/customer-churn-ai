@@ -57,3 +57,65 @@ def predict_churn(
             "success": False,
             "error": str(e)
         }
+def get_prediction_history(
+    limit=20
+):
+
+    endpoint = (
+        f"{API_URL}/history"
+    )
+
+    try:
+
+        response = requests.get(
+            endpoint,
+            params={
+                "limit": limit
+            },
+            timeout=30
+        )
+
+        response.raise_for_status()
+
+        return {
+            "success": True,
+            "data": response.json()
+        }
+
+    except requests.exceptions.RequestException as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }
+def get_high_risk_history(
+    limit=20
+):
+
+    endpoint = (
+        f"{API_URL}/history/high-risk"
+    )
+
+    try:
+
+        response = requests.get(
+            endpoint,
+            params={
+                "limit": limit
+            },
+            timeout=30
+        )
+
+        response.raise_for_status()
+
+        return {
+            "success": True,
+            "data": response.json()
+        }
+
+    except requests.exceptions.RequestException as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }

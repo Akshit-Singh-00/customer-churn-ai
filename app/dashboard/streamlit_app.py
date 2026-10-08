@@ -1,7 +1,12 @@
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
-from api_client import predict_churn
+from api_client import (
+    predict_churn,
+    get_prediction_history,
+    get_high_risk_history
+)
 
 
 # --------------------------------------------------
@@ -247,55 +252,28 @@ with st.form(
 
 if submitted:
 
-    # --------------------------------------------------
-    # Prepare customer JSON
-    # --------------------------------------------------
-
     customer_data = {
-
         "gender": gender,
-
         "seniorcitizen": seniorcitizen,
-
         "partner": partner,
-
         "dependents": dependents,
-
         "tenure": tenure,
-
         "phoneservice": phoneservice,
-
         "multiplelines": multiplelines,
-
         "internetservice": internetservice,
-
         "onlinesecurity": onlinesecurity,
-
         "onlinebackup": onlinebackup,
-
         "deviceprotection": deviceprotection,
-
         "techsupport": techsupport,
-
         "streamingtv": streamingtv,
-
         "streamingmovies": streamingmovies,
-
         "contract": contract,
-
         "paperlessbilling": paperlessbilling,
-
         "paymentmethod": paymentmethod,
-
         "monthlycharges": monthlycharges,
-
         "totalcharges": totalcharges
     }
 
-
-    # --------------------------------------------------
-    # Call FastAPI
-    # --------------------------------------------------
 
     with st.spinner(
         "Analyzing customer churn risk..."
@@ -323,10 +301,6 @@ if submitted:
         st.stop()
 
 
-    # --------------------------------------------------
-    # API response
-    # --------------------------------------------------
-
     data = result["data"]
 
 
@@ -339,7 +313,6 @@ if submitted:
     st.subheader(
         "Prediction Result"
     )
-
 
     probability = data[
         "churn_probability_percent"
@@ -354,10 +327,9 @@ if submitted:
     ]
 
 
-    metric1, metric2, metric3 = (
-        st.columns(3)
+    metric1, metric2, metric3 = st.columns(
+        3
     )
-
 
     metric1.metric(
         "Churn Probability",
@@ -376,7 +348,7 @@ if submitted:
 
 
     # --------------------------------------------------
-    # Churn risk bar
+    # Churn risk progress
     # --------------------------------------------------
 
     st.write(
@@ -414,7 +386,6 @@ if submitted:
         []
     )
 
-
     if risk_factors:
 
         risk_df = pd.DataFrame(
@@ -446,7 +417,6 @@ if submitted:
         "top_protective_factors",
         []
     )
-
 
     if protective_factors:
 
@@ -481,6 +451,11 @@ if submitted:
         "AI Retention Recommendation"
     )
 
+    st.caption(
+        "Generated using the ML prediction, SHAP explanation, "
+        "and retrieved company retention policies."
+    )
+
 
     ai_status = data.get(
         "ai_status",
@@ -510,6 +485,7 @@ if submitted:
         ai_recommendation
     )
 
+
     # --------------------------------------------------
     # Retrieved retention policies
     # --------------------------------------------------
@@ -524,13 +500,8 @@ if submitted:
         st.divider()
 
         st.subheader(
-    "AI Retention Recommendation"
-)
-
-        st.caption(
-    "Generated using the ML prediction, SHAP explanation, "
-    "and retrieved company retention policies."
-)
+            "Retention Policies Used"
+        )
 
         st.write(
             "These company policies were retrieved by "
@@ -559,3 +530,362 @@ if submitted:
                     retrieved_policies
                 ):
                     st.divider()
+
+
+# --------------------------------------------------
+# Prediction History & Analytics
+# --------------------------------------------------
+
+st.divider()
+
+st.header(
+    "Prediction History & Analytics"
+)
+
+
+history_tab, high_risk_tab, analytics_tab = st.tabs(
+    [
+        "Recent Predictions",
+        "High-Risk Customers",
+        "Analytics"
+    ]
+)
+
+
+# --------------------------------------------------
+# Recent predictions
+# --------------------------------------------------
+
+with history_tab:
+
+    st.subheader(
+        "Recent Predictions"
+    )
+
+    history_result = get_prediction_history(
+        limit=20
+    )
+
+    if not history_result["success"]:
+
+        st.error(
+            "Could not load prediction history."
+        )
+
+        st.code(
+            history_result["error"]
+        )
+
+    else:
+
+        history_data = history_result[
+            "data"
+        ]
+
+        if not history_data:
+
+            st.info(
+                "No prediction history found."
+            )
+
+        else:
+
+            history_df = pd.DataFrame(
+                history_data
+            )
+
+            st.dataframe(
+                history_df,
+                use_container_width=True,
+                hide_index=True
+            )
+
+
+# --------------------------------------------------
+# High-risk customers
+# --------------------------------------------------
+
+with high_risk_tab:
+
+    st.subheader(
+        "High-Risk Customers"
+    )
+
+    high_risk_result = get_high_risk_history(
+        limit=20
+    )
+
+    if not high_risk_result["success"]:
+
+        st.error(
+            "Could not load high-risk history."
+        )
+
+        st.code(
+            high_risk_result["error"]
+        )
+
+    else:
+
+        high_risk_data = high_risk_result[
+            "data"
+        ]
+
+        if not high_risk_data:
+
+            st.info(
+                "No High or Critical risk "
+                "predictions found yet."
+            )
+
+        else:
+
+            high_risk_df = pd.DataFrame(
+                high_risk_data
+            )
+
+            st.dataframe(
+                high_risk_df,
+                use_container_width=True,
+                hide_index=True
+            )
+
+
+# --------------------------------------------------
+# Analytics
+# --------------------------------------------------
+
+with analytics_tab:
+
+    st.subheader(
+        "Prediction Analytics"
+    )
+
+    analytics_result = get_prediction_history(
+        limit=100
+    )
+
+    if not analytics_result["success"]:
+
+        st.error(
+            "Could not load analytics data."
+        )
+
+    else:
+
+        analytics_data = analytics_result[
+            "data"
+        ]
+
+        if not analytics_data:
+
+            st.info(
+                "Not enough prediction data yet."
+            )
+
+        else:
+
+            analytics_df = pd.DataFrame(
+                analytics_data
+            )
+
+
+            # --------------------------------------------------
+            # Metrics
+            # --------------------------------------------------
+
+            total_predictions = len(
+                analytics_df
+            )
+
+            churn_predictions = (
+                analytics_df[
+                    "prediction"
+                ] == "Churn"
+            ).sum()
+
+            average_risk = (
+                analytics_df[
+                    "churn_probability"
+                ]
+                .mean()
+                * 100
+            )
+
+            high_risk_count = (
+                analytics_df[
+                    "risk_category"
+                ]
+                .isin(
+                    [
+                        "High",
+                        "Critical"
+                    ]
+                )
+                .sum()
+            )
+
+
+            m1, m2, m3, m4 = st.columns(
+                4
+            )
+
+            m1.metric(
+                "Total Predictions",
+                total_predictions
+            )
+
+            m2.metric(
+                "Predicted Churn",
+                int(
+                    churn_predictions
+                )
+            )
+
+            m3.metric(
+                "Average Churn Risk",
+                f"{average_risk:.2f}%"
+            )
+
+            m4.metric(
+                "High-Risk Customers",
+                int(
+                    high_risk_count
+                )
+            )
+
+
+            # --------------------------------------------------
+            # Risk Distribution
+            # --------------------------------------------------
+
+            risk_counts = (
+                analytics_df[
+                    "risk_category"
+                ]
+                .value_counts()
+            )
+
+            risk_chart_df = (
+                risk_counts
+                .reset_index()
+            )
+
+            risk_chart_df.columns = [
+                "Risk Category",
+                "Count"
+            ]
+
+            fig_risk = px.bar(
+                risk_chart_df,
+                x="Risk Category",
+                y="Count",
+                text="Count",
+                title="Risk Distribution"
+            )
+
+            fig_risk.update_traces(
+                textposition="outside"
+            )
+
+            fig_risk.update_layout(
+                height=400,
+                xaxis_title="Risk Category",
+                yaxis_title="Number of Predictions"
+            )
+
+            st.plotly_chart(
+                fig_risk,
+                use_container_width=True
+            )
+
+
+            # --------------------------------------------------
+            # Prediction Distribution
+            # --------------------------------------------------
+
+            prediction_counts = (
+                analytics_df[
+                    "prediction"
+                ]
+                .value_counts()
+            )
+
+            prediction_chart_df = (
+                prediction_counts
+                .reset_index()
+            )
+
+            prediction_chart_df.columns = [
+                "Prediction",
+                "Count"
+            ]
+
+            fig_prediction = px.bar(
+                prediction_chart_df,
+                x="Prediction",
+                y="Count",
+                text="Count",
+                title="Prediction Distribution"
+            )
+
+            fig_prediction.update_traces(
+                textposition="outside"
+            )
+
+            fig_prediction.update_layout(
+                height=400,
+                xaxis_title="Prediction",
+                yaxis_title="Number of Predictions"
+            )
+
+            st.plotly_chart(
+                fig_prediction,
+                use_container_width=True
+            )
+
+
+            # --------------------------------------------------
+            # Average churn risk by contract
+            # --------------------------------------------------
+
+            contract_risk = (
+                analytics_df
+                .groupby(
+                    "contract"
+                )[
+                    "churn_probability"
+                ]
+                .mean()
+                .mul(100)
+                .reset_index()
+            )
+
+            contract_risk.columns = [
+                "Contract",
+                "Average Churn Risk"
+            ]
+
+            fig_contract = px.bar(
+                contract_risk,
+                x="Contract",
+                y="Average Churn Risk",
+                text="Average Churn Risk",
+                title="Average Churn Risk by Contract"
+            )
+
+            fig_contract.update_traces(
+                texttemplate="%{text:.1f}%",
+                textposition="outside"
+            )
+
+            fig_contract.update_layout(
+                height=400,
+                xaxis_title="Contract Type",
+                yaxis_title="Average Churn Risk (%)"
+            )
+
+            st.plotly_chart(
+                fig_contract,
+                use_container_width=True
+            )
