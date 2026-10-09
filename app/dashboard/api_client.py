@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 
@@ -34,42 +33,13 @@ def get_api_url():
 
 API_URL = get_api_url()
 
-from pathlib import Path
-import os
 
-import requests
-from dotenv import load_dotenv
-
-
-# ----------------------------------
-# Load environment variables
-# ----------------------------------
-
-PROJECT_ROOT = Path(
-    __file__
-).resolve().parents[2]
-
-load_dotenv(
-    PROJECT_ROOT / ".env"
-)
-
-
-API_URL = os.getenv(
-    "FASTAPI_URL",
-    "http://127.0.0.1:8000"
-)
-
-
-# ----------------------------------
-# Prediction API call
-# ----------------------------------
+# --------------------------------------------------
+# Predict churn
+# --------------------------------------------------
 
 def predict_churn(
-    response = requests.post(
-    endpoint,
-    json=customer_data,
-    timeout=120
-)
+    customer_data: dict
 ):
 
     endpoint = (
@@ -81,7 +51,7 @@ def predict_churn(
         response = requests.post(
             endpoint,
             json=customer_data,
-            timeout=60
+            timeout=120
         )
 
         response.raise_for_status()
@@ -97,6 +67,12 @@ def predict_churn(
             "success": False,
             "error": str(e)
         }
+
+
+# --------------------------------------------------
+# Get prediction history
+# --------------------------------------------------
+
 def get_prediction_history(
     limit=20
 ):
@@ -128,6 +104,12 @@ def get_prediction_history(
             "success": False,
             "error": str(e)
         }
+
+
+# --------------------------------------------------
+# Get high-risk history
+# --------------------------------------------------
+
 def get_high_risk_history(
     limit=20
 ):
