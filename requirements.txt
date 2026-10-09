@@ -151,3 +151,8 @@ websocket-client==1.9.2
 websockets==16.1.1
 widgetsnbextension==4.0.16
 xgboost==3.4.1
+streamlit
+pandas
+plotly
+requests
+python-dotenv
