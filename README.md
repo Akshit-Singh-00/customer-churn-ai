@@ -344,19 +344,29 @@ models/
 
 This allows FastAPI to load the trained model without retraining it for every request.
 
-### Final Model Evaluation
+## 📊 Final Model Performance
 
-The exact held-out test metrics should be taken from the model experimentation notebook.
+The selected customer churn classification model was evaluated using the held-out test dataset.
 
-| Metric | Result |
+| Evaluation Metric | Result |
 |---|---|
-| Accuracy | Add measured value |
-| Precision | Add measured value |
-| Recall | Add measured value |
-| F1 Score | Add measured value |
-| ROC-AUC | Add measured value |
-| Average Precision | Add measured value |
-| Deployed Decision Threshold | 0.55 |
+| Accuracy | **76.93%** |
+| Precision | **54.95%** |
+| Recall | **72.73%** |
+| F1 Score | **62.60%** |
+| ROC-AUC | **0.8420** |
+
+### Model Performance Analysis
+
+The model achieved 76.93% accuracy and 72.73% recall on the evaluation data.
+
+Recall is particularly important in customer churn prediction because failing to identify a customer who is likely to leave may result in a missed retention opportunity.
+
+The ROC-AUC score of 0.8420 indicates useful discrimination between churn and non-churn customers.
+
+The model was developed using classification algorithms, feature engineering, preprocessing pipelines, cross-validation, hyperparameter tuning, and decision-threshold optimization.
+
+**Note:** The test dataset was used during development for evaluation and inspection, so these metrics should not be presented as an independently validated production performance guarantee.
 
 ---
 
